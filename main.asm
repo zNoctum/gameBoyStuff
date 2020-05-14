@@ -58,6 +58,9 @@ Start:
     ; Turn screen on, display background
     ld a, %10000001
     ld [rLCDC], a
+    ; Lock up
+.lockup
+    jr .lockup
 
 
 SECTION "Font", ROM0
