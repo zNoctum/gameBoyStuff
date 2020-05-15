@@ -10,6 +10,9 @@ REPT $150 - $104
     db 0
 ENDR
 
+SECTION "Vblank", ROM0[$0040]
+	jp vblank
+
 SECTION "MEM", ROM0
 ; hl = destination address
 ; bc = count of bytes
@@ -25,12 +28,17 @@ memzero::
 SECTION "Game code", ROM0
 
 Start:
+    di	; disable interrupts
+	ld	a, IEF_VBLANK	; --
+	ld	[rIE], a	; Set only Vblank interrupt flag
+	ei			; enable interrupts. Only vblank will trigger
+    
     ; Turn off the LCD
-.waitVBlank
+    xor a
     ld a, [rLY]
-    cp 144 ; Check if the LCD is past VBlank
-    jr c, .waitVBlank
 
+vblank:
+    nop
     xor a ; ld a, 0 ; We only need to reset a value with bit 7 reset, but 0 does the job
     ld [rLCDC], a ; We will have to write to LCDC again later, so it's not a bother, really.
 
@@ -48,9 +56,9 @@ Start:
 
 .print
     ld hl, $9800 ; set tile indexes
-    ld bc, $400
+    ld bc, $400 
     call memzero
-    
+
     ld hl, $9800
     ld a, $01 ; clear all indexes
     ld [hl], a
