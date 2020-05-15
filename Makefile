@@ -1,6 +1,6 @@
-obj/%.o: src/%.asm
+bin/%.o: src/%.asm
 	rgbasm -o $@ $< -iinclude
-bin/main.gb: obj/main.o
+bin/main.gb: bin/main.o
 	rgblink -o $@ $^
 	rgbfix -v -p 0 $@
 clean:

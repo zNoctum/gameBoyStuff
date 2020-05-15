@@ -34,10 +34,10 @@ Start:
     or c
     jr nz, .loadTiles
 
-	ld hl, $9800 ; set tile indecies
+	ld hl, $9800 ; set tile indcies
 .print
-    ld a, $
-    ld [hli], a
+    ld a, $01
+    ld [hl], a
 
     ; Init Color palette
     ld a, %11100100
@@ -61,5 +61,5 @@ Start:
 SECTION "Tiles", ROM0
 
 Tiles:
-INCBIN "x.gbr"
+INCBIN "out.2bpp"
 TilesEnd:
