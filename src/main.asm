@@ -10,6 +10,18 @@ REPT $150 - $104
     db 0
 ENDR
 
+SECTION "MEM", ROM0
+; hl = destination address
+; bc = count of bytes
+memzero::
+    xor a
+    ld [hli], a
+    dec bc
+    ld a, b
+    or c
+    jr nz, memzero
+    ret
+
 SECTION "Game code", ROM0
 
 Start:
@@ -34,10 +46,15 @@ Start:
     or c
     jr nz, .loadTiles
 
-	ld hl, $9800 ; set tile indcies
 .print
-    ld a, $01
+    ld hl, $9800 ; set tile indexes
+    ld bc, $400
+    call memzero
+    
+    ld hl, $9800
+    ld a, $01 ; clear all indexes
     ld [hl], a
+
 
     ; Init Color palette
     ld a, %11100100
