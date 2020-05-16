@@ -25,6 +25,41 @@ memzero::
     jr nz, memzero
     ret
 
+SECTION "PRINT", rom0
+; a = value
+; hl = location
+printHex::
+    ld b, a
+    ld a, $30
+    ld [hli], a
+    ld a, $78
+    ld [hli], a
+    ld a, b
+    and a, $0f
+.printNibble
+    cp $09
+    add a, $30
+    jr nc, .char
+    ld [hli], a
+    jr .nibbleEnd
+.char
+    add 7
+    ld [hli], a
+.nibbleEnd
+    ld a, b
+    swap a
+    and a, $0f
+.printNibble2
+    cp $09
+    add a, $30
+    jr nc, .char2
+    ld [hli], a
+    ret
+.char2
+    add 7
+    ld [hli], a
+    ret
+
 SECTION "Game code", ROM0
 
 Start:
@@ -36,9 +71,9 @@ Start:
     ; Turn off the LCD
     xor a
     ld a, [rLY]
+    ld sp, $ffff
 
 vblank:
-    nop
     xor a ; ld a, 0 ; We only need to reset a value with bit 7 reset, but 0 does the job
     ld [rLCDC], a ; We will have to write to LCDC again later, so it's not a bother, really.
 
@@ -54,15 +89,15 @@ vblank:
     or c
     jr nz, .loadTiles
 
-.print
-    ld hl, $9800 ; set tile indexes
+    ld hl, $9800 ; clear background
     ld bc, $400 
     call memzero
 
     ld hl, $9800
-    ld a, $01 ; clear all indexes
-    ld [hl], a
+    
 
+    ld a, $ff
+    call printHex
 
     ; Init Color palette
     ld a, %11100100
@@ -86,5 +121,5 @@ vblank:
 SECTION "Tiles", ROM0
 
 Tiles:
-INCBIN "out.2bpp"
+INCBIN "font.chr"
 TilesEnd:
