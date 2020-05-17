@@ -26,39 +26,32 @@ memzero::
     ret
 
 SECTION "PRINT", rom0
-; a = value
-; hl = location
-printHex::
+; @param a - value
+; @param hl - location
+; @destroy b c
+PrintHex::
     ld b, a
-    ld a, $30
+    ld a, "0"
     ld [hli], a
-    ld a, $78
+    ld a, "x"
     ld [hli], a
-    ld a, b
-    and a, $0f
-.printNibble
-    cp $09
-    add a, $30
-    jr nc, .char
-    ld [hli], a
-    jr .nibbleEnd
-.char
-    add 7
-    ld [hli], a
-.nibbleEnd
     ld a, b
     swap a
-    and a, $0f
-.printNibble2
-    cp $09
-    add a, $30
-    jr nc, .char2
+    call .printNibble
+    ld a, b
+    call .printNibble
+    ret
+
+.printNibble
+    and $0F
+    cp 10
+    jr c, .digit
+    add ("A" - 10) - "0" ; We want 10 to map to "A", but we also have to compensate for the add just below
+.digit
+    add a, "0" ; Turn digit into character code
     ld [hli], a
     ret
-.char2
-    add 7
-    ld [hli], a
-    ret
+
 
 SECTION "Game code", ROM0
 
@@ -95,8 +88,9 @@ vblank:
 
     ld hl, $9800
     
-
+    xor a
     ld a, $ff
+    rla
     call printHex
 
     ; Init Color palette
